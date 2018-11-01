@@ -1,5 +1,6 @@
 package com.sbt.hackaton.web;
 
+import com.sbt.hackaton.web.messages.AppMessage;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

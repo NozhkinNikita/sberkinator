@@ -1,6 +1,8 @@
 package com.sbt.hackaton.web.messangerapi.telegram;
 
-import com.sbt.hackaton.web.AppMessage;
+import com.sbt.hackaton.web.messages.AppMessage;
+import com.sbt.hackaton.web.questions.tree.QuestionService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
@@ -19,8 +21,8 @@ import java.util.concurrent.Executors;
 @Component
 public class TelegramBotInitializer {
 
-//    @Autowired
-//    private TelegramSender telegramSender;
+    @Autowired
+    QuestionService questionService;
 
     @Resource(name = "queueToApp")
     private BlockingQueue<AppMessage> queueToApp;
@@ -52,7 +54,7 @@ public class TelegramBotInitializer {
 
         // Register bot
         try {
-            botsApi.registerBot(new TelegramSender(botOptions, queueToApp, queueToClient, executor));
+            botsApi.registerBot(new TelegramSender(botOptions, queueToApp, queueToClient, executor, questionService));
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }

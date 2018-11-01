@@ -1,0 +1,38 @@
+{
+  "questionText": "Здравствуйте, уважаемый Клиент! По какой проблеме Вы хотели бы оставить свой отзыв?",
+  "answers": [
+    {
+      "answer": "Обслуживание клиентов",
+      "isTerminate": false,
+      "questionNode": {
+        "questionText": "Выберите проблему из списка:",
+        "answers": [
+          {
+            "answer": "Причина моего обращения так и не была решена",
+            "questionNode": {
+              "questionText": "Вы обращались по вопросу:",
+              "answers": [
+                {
+                  "answer": "Обслуживания по банковским картам",
+                  "isTerminate": true
+                },
+                {
+                  "answer": "Обслуживания по депозитам",
+                  "isTerminate": true
+                },
+                {
+                  "answer": "Обслуживания по кредитам",
+                  "isTerminate": true
+                },
+                {
+                  "answer": "Обслуживания юридических лиц",
+                  "isTerminate": true
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
