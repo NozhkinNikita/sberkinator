@@ -36,9 +36,9 @@ public class QuestionService {
 
         logger.error("root={}", root);
 
+        rootDto = createQuestionDtoByNode(root);
         fillNodes(nodes, root);
 
-        rootDto = createQuestionDtoByNode(root);
         tree = nodes;
 
         logger.info("rootDto: {}", rootDto);
