@@ -1,6 +1,6 @@
 package com.sbt.hackaton.web.messangerapi.telegram;
 
-import com.sbt.hackaton.web.AppMessage;
+import com.sbt.hackaton.web.messages.AppMessage;
 import com.sbt.hackaton.web.questions.tree.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

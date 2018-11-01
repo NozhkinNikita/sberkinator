@@ -1,11 +1,15 @@
 package com.sbt.hackaton.web.applicationapi.websocket;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sbt.hackaton.web.AppMessage;
+import com.sbt.hackaton.web.messages.AppMessage;
+import com.sbt.hackaton.web.messages.*;
+import com.sbt.hackaton.web.messages.ClientData;
+import com.sbt.hackaton.web.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
@@ -13,10 +17,9 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 @Component
 public class WebSocketHandler extends TextWebSocketHandler {
@@ -31,64 +34,84 @@ public class WebSocketHandler extends TextWebSocketHandler {
     @Resource(name = "queueToApp")
     private BlockingQueue<AppMessage> queueToApp;
 
-    private Map<String, List<WebSocketSession>> sessionsByBotName = new ConcurrentHashMap<>();
+    private Map<Long, List<WebSocketSession>> sessionsByChatId = new ConcurrentHashMap<>();
+    private Map<Long, Map<Long, ClientData>> clientsByVspId = new ConcurrentHashMap<>();
+    private Map<Long, List<ChatMessage>> messagesByChatId = new ConcurrentHashMap<>();
+
     private ExecutorService executor = Executors.newFixedThreadPool(1);
 
     @PostConstruct
     public void init() {
         executor.execute(() -> {
             while (!Thread.currentThread().isInterrupted())
-            try {
-                AppMessage incomingMessage = queueToApp.take();
-                sendToApp(incomingMessage);
-            } catch (InterruptedException e) {
-                log.info("Executor thread is interrupted");
-            }
+                try {
+                    AppMessage incomingMessage = queueToApp.take();
+                    clientsByVspId.computeIfAbsent(/*incomingMessage.getVspId()*/123L, k -> new HashMap<>())
+                            .put(incomingMessage.getChatId(), incomingMessage.getClientData());
+                    messagesByChatId.computeIfAbsent(incomingMessage.getChatId(), k -> new LinkedList<>())
+                            .add(new ChatMessage(ChatMessage.Sender.CLIENT, incomingMessage.getMessage()));
+                    sendToApp(incomingMessage);
+                } catch (InterruptedException e) {
+                    log.info("Executor thread is interrupted");
+                }
         });
     }
 
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message) {
-        AppMessage messageToSend = parseMessage(message);
-        if (messageToSend != null) {
-            switch (messageToSend.getCommand()) {
+        AppMessage incomingMessage = parseMessage(message);
+        if (incomingMessage != null) {
+            switch (incomingMessage.getCommand()) {
                 case SUBSCRIBE: {
-                    sessionsByBotName.computeIfAbsent(messageToSend.getBotUserName(), k -> new LinkedList<>())
-                            .add(session);
+                    Map<Long, ClientData> activeChats = clientsByVspId.get(incomingMessage.getVspId());
+                    if (CollectionUtils.isEmpty(activeChats)) {
+                        sendMessage(session, new SubscribeMessage(Command.CHATS_LIST, Collections.EMPTY_LIST));
+                    } else {
+                        sendMessage(session, new SubscribeMessage(Command.CHATS_LIST,
+                                activeChats.entrySet().stream().map((entry) -> {
+                                    sessionsByChatId.computeIfAbsent(entry.getKey(), k -> new LinkedList<>())
+                                            .add(session);
+                                        return new SubscribeMessage.ActiveChat(entry.getKey(), entry.getValue());})
+                                        .collect(Collectors.toList())));
+                    }
+                    break;
+            }
+            case SEND: {
+                messagesByChatId.computeIfAbsent(incomingMessage.getChatId(), k -> new LinkedList<>())
+                        .add(new ChatMessage(ChatMessage.Sender.APP, incomingMessage.getMessage()));
+                queueToClient.add(incomingMessage);
+                break;
+            }
+            case UNSUBSCRIBE: {
+                sessionsByChatId.computeIfPresent(incomingMessage.getChatId(), (k, v) -> {
+                    v.remove(session);
+                    return v;
+                });
+                break;
+            }
+                case GET_CHAT: {
+                    sendMessage(session, new ChatHistory(Command.GET_CHAT, messagesByChatId.get(incomingMessage.getChatId())));
                     break;
                 }
-                case SEND: {
-                    queueToClient.add(new AppMessage(messageToSend.getCommand(), messageToSend.getBotUserName(),
-                            messageToSend.getChatId(), messageToSend.getMessage()));
-                    break;
-                }
-                case UNSUBSCRIBE: {
-                    sessionsByBotName.computeIfPresent(messageToSend.getBotUserName(), (k, v) -> {
-                        v.remove(session);
-                        return v;
-                    });
-                    break;
-                }
-                default: {
-                    throw new IllegalArgumentException(String.format("Command %s is not supported", messageToSend.getCommand()));
-                }
+            default: {
+                throw new IllegalArgumentException(String.format("Command %s is not supported", incomingMessage.getCommand()));
             }
         }
     }
 
+}
+
     private void sendToApp(AppMessage message) {
-        sessionsByBotName.computeIfPresent(message.getBotUserName(), (k, v) -> {
-            v.forEach(webSocketSession -> sendMessage(webSocketSession, message));
-            return v;
-        });
-        for(WebSocketSession webSocketSession : sessionsByBotName.get(message.getBotUserName())) {
-            try {
-                webSocketSession.sendMessage(new TextMessage(
-                        objectMapper.writeValueAsString(message)));
-            } catch (IOException e) {
-                log.error("Cannot send message to application: {}. Exception: {}", message, e);
-            }
+        List<WebSocketSession> sessions = sessionsByChatId.get(message.getChatId());
+        if (!CollectionUtils.isEmpty(sessions)) {
+            sessions.forEach(webSocketSession -> {
+                sendMessage(webSocketSession, message);
+            });
         }
+//        sessionsByChatId.computeIfPresent(message.getChatId(), (k, v) -> {
+//            v.forEach(webSocketSession -> sendMessage(webSocketSession, message));
+//            return v;
+//        });
     }
 
     private AppMessage parseMessage(TextMessage message) {
@@ -100,7 +123,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         return null;
     }
 
-    private String serializeMessage(AppMessage message) {
+    private String serializeMessage(Object message) {
         try {
             return objectMapper.writeValueAsString(message);
         } catch (IOException e) {
@@ -109,10 +132,10 @@ public class WebSocketHandler extends TextWebSocketHandler {
         return null;
     }
 
-    private void sendMessage(WebSocketSession webSocketSession, AppMessage message) {
+    private void sendMessage(WebSocketSession webSocketSession, Message message) {
         try {
             webSocketSession.sendMessage(new TextMessage(
-                    serializeMessage(message)));
+                    Objects.requireNonNull(serializeMessage(message))));
         } catch (IOException e) {
             log.error("Error while sending message {}. Exception: {}", message, e);
         }

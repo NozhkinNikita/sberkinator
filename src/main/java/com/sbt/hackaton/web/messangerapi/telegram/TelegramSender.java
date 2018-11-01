@@ -1,6 +1,7 @@
 package com.sbt.hackaton.web.messangerapi.telegram;
 
-import com.sbt.hackaton.web.AppMessage;
+import com.sbt.hackaton.web.messages.AppMessage;
+import com.sbt.hackaton.web.messages.ClientData;
 import com.sbt.hackaton.web.Command;
 import com.sbt.hackaton.web.questions.tree.QuestionService;
 import com.sbt.hackaton.web.questions.tree.dto.QuestionDto;
@@ -32,7 +33,7 @@ public class TelegramSender extends TelegramLongPollingBot {
     private BlockingQueue<AppMessage> queueToApp;
 
     private BlockingQueue<AppMessage> queueToClient;
-    private ExecutorService executor = Executors.newFixedThreadPool(1);
+    private ExecutorService executor;
 
     public TelegramSender(DefaultBotOptions options, BlockingQueue<AppMessage> queueToApp,
                           BlockingQueue<AppMessage> queueToClient, ExecutorService executor, QuestionService questionService) {
@@ -74,7 +75,12 @@ public class TelegramSender extends TelegramLongPollingBot {
         if (update.hasMessage() && update.getMessage().hasText()) {
             String message = update.getMessage().getText();
             long chatId = update.getMessage().getChatId();
-            queueToApp.add(new AppMessage(Command.SEND, getBotUsername(), chatId, message));
+            String clientFirstName = update.getMessage().getFrom().getFirstName();
+            String clientLastName = update.getMessage().getFrom().getLastName();
+            String clientUserName = update.getMessage().getFrom().getUserName();
+            AppMessage appMessage = new AppMessage(Command.SEND, chatId, message,
+                    new ClientData(clientFirstName, clientLastName, clientUserName));
+            queueToApp.add(appMessage);
             if (message.equalsIgnoreCase("/start")) {
                  currentQuestion = questionService.getRoot();
                  sendMessage = getSendMessage(update.getMessage().getChatId().toString(), currentQuestion);
