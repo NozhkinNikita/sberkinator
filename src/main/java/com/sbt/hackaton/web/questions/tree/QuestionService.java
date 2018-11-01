@@ -59,7 +59,7 @@ public class QuestionService {
     }
 
     private void addReviewAnswer(QuestionDto questionDto){
-        questionDto.getAnswers().add(new AnswerDto(reviewUUID, "Оставить отзыв", true));
+        questionDto.getAnswers().add(new AnswerDto(reviewUUID, "Оставить свой отзыв", true));
     }
 
     public QuestionDto getRoot() {
