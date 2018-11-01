@@ -12,7 +12,6 @@ sock.onopen = function () {
     console.log("connect");
 
     var send = {
-
         command: command,
         vspId: vspId
     }
@@ -51,7 +50,7 @@ sock.onmessage = function (e) {
                 var sender = content.messages[key].sender === "CLIENT" ? currentName : "BOT";
                 $("#messages").append(
                     '<p class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">' +
-                    ' <strong class="d-block text-gray-dark">@' + sender + '</strong>' +
+                    '<strong class="d-block text-gray-dark">@' + sender + '</strong>' +
                     content.messages[key].message + '</p>'
                 );
             }
