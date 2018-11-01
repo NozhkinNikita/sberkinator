@@ -1,8 +1,8 @@
 package com.sbt.hackaton.web.messangerapi.telegram;
 
+import com.sbt.hackaton.web.Command;
 import com.sbt.hackaton.web.messages.AppMessage;
 import com.sbt.hackaton.web.messages.ClientData;
-import com.sbt.hackaton.web.Command;
 import com.sbt.hackaton.web.questions.tree.QuestionService;
 import com.sbt.hackaton.web.questions.tree.dto.QuestionDto;
 import org.slf4j.Logger;
@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -20,7 +21,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class TelegramSender extends TelegramLongPollingBot {
@@ -29,6 +29,10 @@ public class TelegramSender extends TelegramLongPollingBot {
     private QuestionService questionService;
 
     private QuestionDto currentQuestion;
+
+    private boolean reviewMessage = false;
+    
+    private boolean botJobEnded = false;
 
     private BlockingQueue<AppMessage> queueToApp;
 
@@ -71,28 +75,37 @@ public class TelegramSender extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
+        sendMessageInfoToService(update);
+        if (!botJobEnded) {
+            sendBotAnswer(update);
+        }
+    }
+
+    private void sendBotAnswer(Update update) {
         SendMessage sendMessage = null;
         if (update.hasMessage() && update.getMessage().hasText()) {
-            String message = update.getMessage().getText();
-            long chatId = update.getMessage().getChatId();
-            String clientFirstName = update.getMessage().getFrom().getFirstName();
-            String clientLastName = update.getMessage().getFrom().getLastName();
-            String clientUserName = update.getMessage().getFrom().getUserName();
-            AppMessage appMessage = new AppMessage(Command.SEND, chatId, message,
-                    new ClientData(clientFirstName, clientLastName, clientUserName));
-            queueToApp.add(appMessage);
-            if (message.equalsIgnoreCase("/start")) {
-                 currentQuestion = questionService.getRoot();
-                 sendMessage = getSendMessage(update.getMessage().getChatId().toString(), currentQuestion);
-            } else {
+            if (reviewMessage){
+                sendMessage = sendEndBotMessage(update.getMessage().getChatId().toString());
+            }
+            else {
+                if (update.getMessage().getText().equalsIgnoreCase("/start")) {
+                    currentQuestion = questionService.getRoot();
+                    sendMessage = getSendMessage(update.getMessage().getChatId().toString(), currentQuestion);
+                } else {
                     sendMessage = getSendMessage(update.getMessage().getChatId().toString(), currentQuestion);
                     sendMessage.setText("Пожалуйста, ответьте на вопрос: \n" + sendMessage.getText());
 
+                }
             }
         } else if (update.hasCallbackQuery()) {
+            reviewMessage = false;
             UUID id = UUID.fromString(update.getCallbackQuery().getData());
-            if (questionService.isTerminateAnswer(id)){
-                sendMessage = sendEndQuestionMessage(update.getCallbackQuery().getMessage().getChatId().toString());
+            if (questionService.isReviewAnswer(id)) {
+                sendMessage = sendReviewMessage(update.getCallbackQuery().getMessage().getChatId().toString());
+                reviewMessage = true;
+            }
+             else if (questionService.isTerminateAnswer(id)) {
+                sendMessage = sendEndBotMessage(update.getCallbackQuery().getMessage().getChatId().toString());
             } else {
                 currentQuestion = questionService.getNext(UUID.fromString(update.getCallbackQuery().getData()));
                 sendMessage = getSendMessage(update.getCallbackQuery().getMessage().getChatId().toString(), currentQuestion);
@@ -105,13 +118,43 @@ public class TelegramSender extends TelegramLongPollingBot {
         }
     }
 
-    private SendMessage sendEndQuestionMessage(String chatId) {
+
+    private void sendMessageInfoToService(Update update) {
+        Message message = null;
+        if (update.hasMessage() && update.getMessage().hasText()) {
+            
+            message = update.getMessage();
+        }
+        else if(update.hasCallbackQuery()){
+            message = update.getCallbackQuery().getMessage();
+        }
+        String messageTxt = message.getText();
+        long chatId = message.getChatId();
+        String clientFirstName = message.getFrom().getFirstName();
+        String clientLastName = message.getFrom().getLastName();
+        String clientUserName = message.getFrom().getUserName();
+        AppMessage appMessage = new AppMessage(Command.SEND, chatId, messageTxt,
+                new ClientData(clientFirstName, clientLastName, clientUserName));
+        queueToApp.add(appMessage);
+    }
+
+    private SendMessage sendReviewMessage(String chatId) {
         SendMessage message = new SendMessage() // Create a SendMessage object with mandatory fields
                 .setChatId(chatId)
-                .setText("Спасибо за ответы на вопросы!/n" +
-                        "В ближайшее время с вами свяжется наш менеджер.")
+                .setText("Спасибо за обращение!\n" +
+                        "Ниже вы можете написать ваш отзыв.")
                 .setParseMode("HTML");
 
+        return message;
+    }
+
+    private SendMessage sendEndBotMessage(String chatId) {
+        SendMessage message = new SendMessage() // Create a SendMessage object with mandatory fields
+                .setChatId(chatId)
+                .setText("Спасибо за "  + (reviewMessage ? "ваш отзыв" : "ответы на вопросы") +"!\n" +
+                        "В ближайшее время с вами свяжется наш менеджер.")
+                .setParseMode("HTML");
+        botJobEnded = true;
         return message;
     }
 

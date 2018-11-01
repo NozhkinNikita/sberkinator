@@ -18,6 +18,8 @@ public class QuestionService {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
+    private static final UUID reviewUUID = UUID.randomUUID();
+
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -42,6 +44,8 @@ public class QuestionService {
 
         logger.info("rootDto: {}", rootDto);
         logger.info("tree: {}", tree);
+
+        terminateAnswers.add(reviewUUID);
     }
 
     private void fillNodes(final Map<UUID, QuestionDto> nodes, final QuestionNode parent) {
@@ -52,6 +56,10 @@ public class QuestionService {
                 fillNodes(nodes, childQuestionNode);
             }
         });
+    }
+
+    private void addReviewAnswer(QuestionDto questionDto){
+        questionDto.getAnswers().add(new AnswerDto(reviewUUID, "Оставить отзыв", true));
     }
 
     public QuestionDto getRoot() {
@@ -88,6 +96,11 @@ public class QuestionService {
                         new AnswerDto(answerNode.getId(), answerNode.getAnswer(), answerNode.isTerminate())
                 ).collect(Collectors.toList()));
 
-        return questionDto;
+         addReviewAnswer(questionDto);
+         return questionDto;
+    }
+
+    public boolean isReviewAnswer(UUID id) {
+        return reviewUUID.equals(id);
     }
 }
