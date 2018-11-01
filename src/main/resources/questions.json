@@ -1,0 +1,23 @@
+{
+  "questionText": "qwe?",
+  "answers": [
+    {
+      "key": "1",
+      "text": "rty",
+      "questionNode": {
+        "questionText": "aaa?",
+        "answers": [
+          {
+            "key": "1",
+            "text": "TTT",
+            "isTerminate": true
+          }
+        ]
+      }
+    }, {
+      "key": "2",
+      "text": "TTT",
+      "isTerminate": true
+    }
+  ]
+}
