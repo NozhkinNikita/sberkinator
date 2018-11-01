@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/sberkinator.iml" filepath="$PROJECT_DIR$/sberkinator.iml" />
+      <module fileurl="file://$PROJECT_DIR$/hackaton-2-task.iml" filepath="$PROJECT_DIR$/hackaton-2-task.iml" />
     </modules>
   </component>
 </project>
