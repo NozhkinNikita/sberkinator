@@ -91,11 +91,12 @@ public class TelegramSender extends TelegramLongPollingBot {
             }
         } else if (update.hasCallbackQuery()) {
             UUID id = UUID.fromString(update.getCallbackQuery().getData());
-//            if (questionService.isTerminateAnswer(id)){
-//                sendMessage = sendEndQuestionMessage(update.getCallbackQuery().getMessage().getChatId().toString());
-//            }
-            currentQuestion = questionService.getNext(UUID.fromString(update.getCallbackQuery().getData()));
-            sendMessage = getSendMessage(update.getCallbackQuery().getMessage().getChatId().toString(), currentQuestion);
+            if (questionService.isTerminateAnswer(id)){
+                sendMessage = sendEndQuestionMessage(update.getCallbackQuery().getMessage().getChatId().toString());
+            } else {
+                currentQuestion = questionService.getNext(UUID.fromString(update.getCallbackQuery().getData()));
+                sendMessage = getSendMessage(update.getCallbackQuery().getMessage().getChatId().toString(), currentQuestion);
+            }
         }
         try {
             execute(sendMessage); // Call method to send the message
