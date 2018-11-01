@@ -82,7 +82,7 @@ public class TelegramSender extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        sendMessageInfoToService(update);
+        sendClientMessageInfoToService(update);
         if (!botJobEnded) {
             sendBotAnswer(update);
         }
@@ -107,10 +107,6 @@ public class TelegramSender extends TelegramLongPollingBot {
         } else if (update.hasCallbackQuery()) {
             reviewMessage = false;
             UUID id = UUID.fromString(update.getCallbackQuery().getData());
-            User user = update.getCallbackQuery().getFrom();
-            queueToApp.add(new AppMessage(Command.SEND, Sender.CLIENT, update.getCallbackQuery().getMessage().getChatId(),
-                    questionService.getAnswer(id).getAnswer(),
-                    new ClientData(user.getFirstName(), user.getLastName(), user.getUserName())));
 
             if (questionService.isReviewAnswer(id)) {
                 sendMessage = sendReviewMessage(update.getCallbackQuery().getMessage().getChatId().toString());
@@ -124,32 +120,44 @@ public class TelegramSender extends TelegramLongPollingBot {
             }
         }
         try {
+            sendBotMessageInfoToService(sendMessage, update);
             execute(sendMessage); // Call method to send the message
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
     }
 
+    private void sendBotMessageInfoToService(SendMessage sendMessage, Update update) {
+        AppMessage appMessage = new AppMessage(Command.SEND, Sender.BOT, Long.valueOf(sendMessage.getChatId()), sendMessage.getText(),
+                new ClientData("Bot", null, null));
+        queueToApp.add(appMessage);
+    }
 
-    private void sendMessageInfoToService(Update update) {
-        Message message = null;
-        Sender sender = null;
-        if (update.hasMessage() && update.getMessage().hasText()) {
-            message = update.getMessage();
-            sender = Sender.CLIENT;
-        }
+
+    private void sendClientMessageInfoToService(Update update) {
+            Message message = null;
+            String messageTxt = null;
+            Sender sender = Sender.CLIENT;
+            if (update.hasMessage() && update.getMessage().hasText()) {
+                message = update.getMessage();
+                messageTxt = message.getText();
+            }
         else if(update.hasCallbackQuery()){
             message = update.getCallbackQuery().getMessage();
-            sender = Sender.BOT;
+            messageTxt = questionService.getAnswer(UUID.fromString(update.getCallbackQuery().getData())).getAnswer();
         }
-        String messageTxt = message.getText();
         long chatId = message.getChatId();
+        ClientData clientData = getClientData(message);
+        AppMessage appMessage = new AppMessage(Command.SEND, sender, chatId, messageTxt,
+                clientData);
+        queueToApp.add(appMessage);
+    }
+
+    private ClientData getClientData(Message message) {
         String clientFirstName = message.getFrom().getFirstName();
         String clientLastName = message.getFrom().getLastName();
         String clientUserName = message.getFrom().getUserName();
-        AppMessage appMessage = new AppMessage(Command.SEND, sender, chatId, messageTxt,
-                new ClientData(clientFirstName, clientLastName, clientUserName));
-        queueToApp.add(appMessage);
+        return new ClientData(clientFirstName, clientLastName, clientUserName);
     }
 
     private SendMessage sendReviewMessage(String chatId) {

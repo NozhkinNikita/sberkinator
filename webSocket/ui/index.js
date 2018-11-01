@@ -1,5 +1,5 @@
 // Create a connection to http://localhost:9999/echo
-var sock = new SockJS('http://192.168.8.104:8090/socket');
+var sock = new SockJS('http://localhost:8090/socket');
 var chatIdsForMessaging = [];
 var currentName;
 
