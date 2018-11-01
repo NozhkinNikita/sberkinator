@@ -1,19 +1,17 @@
 package com.sbt.hackaton.web.questions.tree;
 
-import java.util.UUID;
-
 public class AnswerNode {
-    private UUID id;
+    private String key;
     private String answer;
     private boolean isTerminate;
     private QuestionNode questionNode;
 
-    public UUID getId() {
-        return id;
+    public String getKey() {
+        return key;
     }
 
-    public void setId(UUID id) {
-        this.id = id;
+    public void setKey(String key) {
+        this.key = key;
     }
 
     public String getAnswer() {
@@ -28,8 +26,8 @@ public class AnswerNode {
         return isTerminate;
     }
 
-    public void setIsTerminate(boolean isTerminate) {
-        this.isTerminate = isTerminate;
+    public void setTerminate(boolean terminate) {
+        isTerminate = terminate;
     }
 
     public QuestionNode getQuestionNode() {
@@ -43,7 +41,7 @@ public class AnswerNode {
     @Override
     public String toString() {
         return "AnswerNode{" +
-                "id=" + id +
+                "key='" + key + '\'' +
                 ", answer='" + answer + '\'' +
                 ", isTerminate=" + isTerminate +
                 ", questionNode=" + questionNode +

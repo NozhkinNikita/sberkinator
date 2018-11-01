@@ -2,19 +2,21 @@
   "questionText": "qwe?",
   "answers": [
     {
-      "answer": "rty",
+      "key": "1",
+      "text": "rty",
       "questionNode": {
         "questionText": "aaa?",
         "answers": [
           {
-            "answer": "TTT",
+            "key": "1",
+            "text": "TTT",
             "isTerminate": true
           }
         ]
       }
-    },
-    {
-      "answer": "TTT",
+    }, {
+      "key": "2",
+      "text": "TTT",
       "isTerminate": true
     }
   ]

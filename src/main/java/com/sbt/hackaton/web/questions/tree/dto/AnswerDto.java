@@ -1,20 +1,18 @@
 package com.sbt.hackaton.web.questions.tree.dto;
 
-import java.util.UUID;
-
 public class AnswerDto {
-    private final UUID id;
+    private final String key;
     private final String answer;
     private final boolean isTerminate;
 
-    public AnswerDto(UUID id, String answer, boolean isTerminate) {
-        this.id = id;
+    public AnswerDto(String key, String answer, boolean isTerminate) {
+        this.key = key;
         this.answer = answer;
         this.isTerminate = isTerminate;
     }
 
-    public UUID getId() {
-        return id;
+    public String getKey() {
+        return key;
     }
 
     public String getAnswer() {
@@ -28,7 +26,7 @@ public class AnswerDto {
     @Override
     public String toString() {
         return "AnswerDto{" +
-                "id=" + id +
+                "key='" + key + '\'' +
                 ", answer='" + answer + '\'' +
                 ", isTerminate=" + isTerminate +
                 '}';

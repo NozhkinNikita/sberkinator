@@ -51,11 +51,11 @@ public class TelegramBotInitializer {
         botOptions.setProxyType(DefaultBotOptions.ProxyType.SOCKS5);
 
         // Register bot
-        try {
-            botsApi.registerBot(new TelegramSender(botOptions, queueToApp, queueToClient, executor));
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            botsApi.registerBot(new TelegramSender(botOptions, queueToApp, queueToClient, executor));
+//        } catch (TelegramApiException e) {
+//            e.printStackTrace();
+//        }
     }
 
 //    public TelegramSender getTelegramSender() {
