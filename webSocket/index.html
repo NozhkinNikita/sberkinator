@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8"/>
+    <title>Sock chat</title>
+  </head>
+  <body>
+    <textarea id="chat-content" style="width:600px;height:200px"></textarea><br/>
+	<input type="text" id="command" value="SUBSCRIBE"/>
+    <input type="text" id="botUserName" value="botUserName"/>
+	<input type="text" id="chatId" value="123321"/>
+    <input type="text" id="message" value="text message"/>	
+    <input type="button" value="sendMessage" onclick="sendMessage()"/>
+	
+    <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script src="http://cdn.sockjs.org/sockjs-0.3.min.js"></script>
+    <script src="index.js" ></script>
+  </body>
+</html>
