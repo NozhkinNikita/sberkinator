@@ -1,31 +1,152 @@
 {
-  "questionText": "Здравствуйте, уважаемый Клиент! По какой проблеме Вы хотели бы оставить свой отзыв?",
+  "questionText": "Здравствуйте, уважаемый Клиент! Вы обращаетесь как:",
   "answers": [
     {
-      "answer": "Обслуживание клиентов",
+      "answer": "Физическое лицо",
       "isTerminate": false,
       "questionNode": {
-        "questionText": "Выберите проблему из списка:",
+        "questionText": "Выберите категорию проблемы:",
         "answers": [
           {
-            "answer": "Причина моего обращения так и не была решена",
+            "answer": "Обслуживание клиентов",
             "questionNode": {
-              "questionText": "Вы обращались по вопросу:",
+              "questionText": "В чем заключается проблема обслуживания?",
               "answers": [
                 {
-                  "answer": "Обслуживания по банковским картам",
+                  "answer": "Хамство сотрудника",
                   "isTerminate": true
                 },
                 {
-                  "answer": "Обслуживания по депозитам",
+                  "answer": "Сотрудник не смог решить мою проблему",
                   "isTerminate": true
                 },
                 {
-                  "answer": "Обслуживания по кредитам",
+                  "answer": "Долгое ожидание своей очереди",
+                  "isTerminate": true
+                }
+              ]
+            }
+          },
+          {
+            "answer": "Помещение и оборудование",
+            "questionNode": {
+              "questionText": "В чем заключается проблема с помещением?",
+              "answers": [
+                {
+                  "answer": "В отделении жарко / холодно / неприятный запах",
                   "isTerminate": true
                 },
                 {
-                  "answer": "Обслуживания юридических лиц",
+                  "answer": "Не работают банкоматы или устройства самообслуживания",
+                  "isTerminate": true
+                },
+                {
+                  "answer": "В отделении грязно / не убрано",
+                  "isTerminate": true
+                },
+                {
+                  "answer": "Отделение плохо оборудовано для людей с ограниченными возможностями здоровья",
+                  "isTerminate": true
+                }
+              ]
+            }
+          },
+          {
+            "answer": "Продукты и услуги Банка",
+            "questionNode": {
+              "questionText": "Выберите тип продукта:",
+              "answers": [
+                {
+                  "answer": "Счета и депозиты",
+                  "isTerminate": true
+                },
+                {
+                  "answer": "Кредит",
+                  "isTerminate": true
+                },
+                {
+                  "answer": "Банковская карта",
+                  "isTerminate": true
+                },
+                {
+                  "answer": "Другое",
+                  "isTerminate": true
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "answer": "Юридическое лицо / Индивидуальный предприниматель",
+      "isTerminate": false,
+      "questionNode": {
+        "questionText": "Выберите категорию проблемы:",
+        "answers": [
+          {
+            "answer": "Обслуживание клиентов",
+            "questionNode": {
+              "questionText": "В чем заключается проблема обслуживания?",
+              "answers": [
+                {
+                  "answer": "Хамство сотрудника",
+                  "isTerminate": true
+                },
+                {
+                  "answer": "Сотрудник не смог решить мою проблему",
+                  "isTerminate": true
+                },
+                {
+                  "answer": "Долгое ожидание своей очереди",
+                  "isTerminate": true
+                }
+              ]
+            }
+          },
+          {
+            "answer": "Помещение и оборудование",
+            "questionNode": {
+              "questionText": "В чем заключается проблема с помещением?",
+              "answers": [
+                {
+                  "answer": "В отделении жарко / холодно / неприятный запах",
+                  "isTerminate": true
+                },
+                {
+                  "answer": "Не работают банкоматы или устройства самообслуживания",
+                  "isTerminate": true
+                },
+                {
+                  "answer": "В отделении грязно / не убрано",
+                  "isTerminate": true
+                },
+                {
+                  "answer": "Отделение плохо оборудовано для людей с ограниченными возможностями здоровья",
+                  "isTerminate": true
+                }
+              ]
+            }
+          },
+          {
+            "answer": "Продукты и услуги Банка",
+            "questionNode": {
+              "questionText": "Выберите тип продукта:",
+              "answers": [
+                {
+                  "answer": "Счета и депозиты",
+                  "isTerminate": true
+                },
+                {
+                  "answer": "Кредит",
+                  "isTerminate": true
+                },
+                {
+                  "answer": "Банковская карта",
+                  "isTerminate": true
+                },
+                {
+                  "answer": "Другое",
                   "isTerminate": true
                 }
               ]
