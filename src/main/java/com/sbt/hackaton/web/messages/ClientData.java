@@ -1,4 +1,4 @@
-package com.sbt.hackaton.web;
+package com.sbt.hackaton.web.messages;
 
 import java.util.Objects;
 

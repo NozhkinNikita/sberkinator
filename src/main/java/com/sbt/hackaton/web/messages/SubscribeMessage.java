@@ -1,6 +1,5 @@
 package com.sbt.hackaton.web.messages;
 
-import com.sbt.hackaton.web.ClientData;
 import com.sbt.hackaton.web.Command;
 
 import java.util.List;

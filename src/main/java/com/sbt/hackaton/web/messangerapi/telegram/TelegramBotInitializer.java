@@ -1,6 +1,6 @@
 package com.sbt.hackaton.web.messangerapi.telegram;
 
-import com.sbt.hackaton.web.AppMessage;
+import com.sbt.hackaton.web.messages.AppMessage;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.bots.DefaultBotOptions;

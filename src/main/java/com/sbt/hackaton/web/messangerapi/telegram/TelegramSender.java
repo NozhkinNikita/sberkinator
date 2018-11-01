@@ -1,6 +1,7 @@
 package com.sbt.hackaton.web.messangerapi.telegram;
 
-import com.sbt.hackaton.web.AppMessage;
+import com.sbt.hackaton.web.messages.AppMessage;
+import com.sbt.hackaton.web.messages.ClientData;
 import com.sbt.hackaton.web.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +13,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class TelegramSender extends TelegramLongPollingBot {
     private static final Logger log = LoggerFactory.getLogger(TelegramSender.class);
@@ -20,7 +20,7 @@ public class TelegramSender extends TelegramLongPollingBot {
     private BlockingQueue<AppMessage> queueToApp;
 
     private BlockingQueue<AppMessage> queueToClient;
-    private ExecutorService executor = Executors.newFixedThreadPool(1);
+    private ExecutorService executor;
 
     public TelegramSender(DefaultBotOptions options, BlockingQueue<AppMessage> queueToApp,
                           BlockingQueue<AppMessage> queueToClient, ExecutorService executor) {
@@ -60,7 +60,12 @@ public class TelegramSender extends TelegramLongPollingBot {
         if (update.hasMessage() && update.getMessage().hasText()) {
             String message = update.getMessage().getText();
             long chatId = update.getMessage().getChatId();
-            queueToApp.add(new AppMessage(Command.SEND, getBotUsername(), chatId, message));
+            String clientFirstName = update.getMessage().getFrom().getFirstName();
+            String clientLastName = update.getMessage().getFrom().getLastName();
+            String clientUserName = update.getMessage().getFrom().getUserName();
+            AppMessage appMessage = new AppMessage(Command.SEND, chatId, message,
+                    new ClientData(clientFirstName, clientLastName, clientUserName));
+            queueToApp.add(appMessage);
         }
     }
 
