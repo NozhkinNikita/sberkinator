@@ -104,7 +104,7 @@ public class TelegramSender extends TelegramLongPollingBot {
                 sendMessage = sendReviewMessage(update.getCallbackQuery().getMessage().getChatId().toString());
                 reviewMessage = true;
             }
-             else if (questionService.isTerminateAnswer(id)) {
+             else if (questionService.getAnswer(id).isTerminate()) {
                 sendMessage = sendEndBotMessage(update.getCallbackQuery().getMessage().getChatId().toString());
             } else {
                 currentQuestion = questionService.getNext(UUID.fromString(update.getCallbackQuery().getData()));

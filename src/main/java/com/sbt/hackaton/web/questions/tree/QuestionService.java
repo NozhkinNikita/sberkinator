@@ -25,7 +25,7 @@ public class QuestionService {
 
     private QuestionDto rootDto;
     private Map<UUID, QuestionDto> tree;
-    private Set<UUID> terminateAnswers = new HashSet<>();
+    private Map<UUID, AnswerDto> answers = new HashMap<>();
 
     @PostConstruct
     public void init() throws Exception {
@@ -45,7 +45,7 @@ public class QuestionService {
         logger.info("rootDto: {}", rootDto);
         logger.info("tree: {}", tree);
 
-        terminateAnswers.add(reviewUUID);
+        answers.put(reviewUUID, new AnswerDto(reviewUUID, "Предложение клиенту оставить отзыв", true));
     }
 
     private void fillNodes(final Map<UUID, QuestionDto> nodes, final QuestionNode parent) {
@@ -74,8 +74,8 @@ public class QuestionService {
         return questionNode;
     }
 
-    public boolean isTerminateAnswer(UUID answerId) {
-        return terminateAnswers.contains(answerId);
+    public AnswerDto getAnswer(UUID answerId) {
+        return answers.get(answerId);
     }
 
     private QuestionDto createQuestionDtoByNode(final QuestionNode node) {
@@ -88,13 +88,11 @@ public class QuestionService {
         questionDto.setAnswers(node.getAnswers().stream()
                 .peek(answerNode -> {
                     answerNode.setId(UUID.randomUUID()); // todo удалить генерацию id
-                    if (answerNode.isTerminate()) {
-                        terminateAnswers.add(answerNode.getId());
-                    }
                 })
                 .map(answerNode ->
                         new AnswerDto(answerNode.getId(), answerNode.getAnswer(), answerNode.isTerminate())
-                ).collect(Collectors.toList()));
+                ).peek(answerDto -> answers.put(answerDto.getId(), answerDto))
+                .collect(Collectors.toList()));
 
          addReviewAnswer(questionDto);
          return questionDto;
