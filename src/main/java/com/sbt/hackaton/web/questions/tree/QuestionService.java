@@ -75,9 +75,8 @@ public class QuestionService {
         questionDto.setQuestionText(node.getQuestionText());
 
         questionDto.setAnswers(node.getAnswers().stream()
-                .map(answerNode -> {
+                .peek(answerNode -> {
                     answerNode.setId(UUID.randomUUID()); // todo удалить генерацию id
-                    return answerNode;
                 })
                 .map(answerNode ->
                 new AnswerDto(answerNode.getId(), answerNode.getAnswer(), answerNode.isTerminate())
