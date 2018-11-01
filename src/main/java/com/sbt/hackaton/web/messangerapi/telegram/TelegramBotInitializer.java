@@ -21,11 +21,11 @@ public class TelegramBotInitializer {
         TelegramBotsApi botsApi = new TelegramBotsApi();
 
         // Register bot
-//        try {
-//            botsApi.registerBot(telegramSender);
-//        } catch (TelegramApiException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            botsApi.registerBot(telegramSender);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
     }
 
     public TelegramSender getTelegramSender() {
