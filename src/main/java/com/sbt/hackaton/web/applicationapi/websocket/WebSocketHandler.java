@@ -77,6 +77,10 @@ public class WebSocketHandler extends TextWebSocketHandler {
     }
 
     private void sendToApp(AppMessage message) {
+        sessionsByBotName.computeIfPresent(message.getBotUserName(), (k, v) -> {
+            v.forEach(webSocketSession -> sendMessage(webSocketSession, message));
+            return v;
+        });
         for(WebSocketSession webSocketSession : sessionsByBotName.get(message.getBotUserName())) {
             try {
                 webSocketSession.sendMessage(new TextMessage(
@@ -94,5 +98,23 @@ public class WebSocketHandler extends TextWebSocketHandler {
             log.error("Cannot parse web socket message= {}. Exception: {}", message.getPayloadLength(), e);
         }
         return null;
+    }
+
+    private String serializeMessage(AppMessage message) {
+        try {
+            return objectMapper.writeValueAsString(message);
+        } catch (IOException e) {
+            log.error("Cannot send message to application: {}. Exception: {}", message, e);
+        }
+        return null;
+    }
+
+    private void sendMessage(WebSocketSession webSocketSession, AppMessage message) {
+        try {
+            webSocketSession.sendMessage(new TextMessage(
+                    serializeMessage(message)));
+        } catch (IOException e) {
+            log.error("Error while sending message {}. Exception: {}", message, e);
+        }
     }
 }
