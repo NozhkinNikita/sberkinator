@@ -99,13 +99,13 @@ function startMessageWithChat() {
         var send = {
             command: command,
             chatId: currentChatId,
-            text: $("#textAreaForChat").val()
+            message: $("#textAreaForChat").val()
         };
         sock.send(JSON.stringify(send));
         $("#messages").append('<p  class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">' +
-            '<strong class="d-block text-gray-dark">@BOT</strong>' +
+            '<strong class="d-block text-gray-dark">Отвественный сотрудник ВСП</strong>' +
             $("#textAreaForChat").val() + '</p>');
-        $("#textAreaForChat").val()
+        $("#textAreaForChat").val('')
     } else {
         $('#textAreaForChat').prop('disabled', false);
         $('#connectToChat').text('Отправить');
@@ -118,5 +118,3 @@ function startMessageWithChat() {
         sock.send(JSON.stringify(send));
     }
 }
-
-
