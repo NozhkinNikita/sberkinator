@@ -61,8 +61,7 @@ public class QuestionService {
         return rootDto;
     }
 
-    public QuestionDto getNext(UUID questionId, String answerKey) {
-        Pair key = new Pair(questionId, answerKey);
+    public QuestionDto getNext(UUID answerId) {
         QuestionDto questionNode = tree.get(key);
         if (questionNode == null) {
             throw new IllegalArgumentException("Отсутствует вопрос по ключу " + key);
