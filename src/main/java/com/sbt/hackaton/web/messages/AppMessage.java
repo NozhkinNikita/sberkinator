@@ -6,6 +6,7 @@ import java.util.Objects;
 
 public class AppMessage extends Message {
     private Command command;
+    private Sender sender;
     private String botUserName;
     private long chatId;
     private long vspId;
@@ -23,11 +24,12 @@ public class AppMessage extends Message {
         this.clientData = clientData;
     }
 
-    public AppMessage(Command command, long chatId, String message, ClientData clientData) {
+    public AppMessage(Command command, Sender sender, long chatId, String message, ClientData clientData) {
         this.command = command;
         this.chatId = chatId;
         this.message = message;
         this.clientData = clientData;
+        this.sender = sender;
     }
 
     public Command getCommand() {
@@ -76,6 +78,14 @@ public class AppMessage extends Message {
 
     public void setVspId(long vspId) {
         this.vspId = vspId;
+    }
+
+    public Sender getSender() {
+        return sender;
+    }
+
+    public void setSender(Sender sender) {
+        this.sender = sender;
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.sbt.hackaton.web.messangerapi.telegram;
 import com.sbt.hackaton.web.Command;
 import com.sbt.hackaton.web.messages.AppMessage;
 import com.sbt.hackaton.web.messages.ClientData;
+import com.sbt.hackaton.web.messages.Sender;
 import com.sbt.hackaton.web.questions.tree.QuestionService;
 import com.sbt.hackaton.web.questions.tree.dto.QuestionDto;
 import org.slf4j.Logger;
@@ -12,10 +13,12 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.rmi.server.UID;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -55,7 +58,11 @@ public class TelegramSender extends TelegramLongPollingBot {
             while (!Thread.currentThread().isInterrupted())
                 try {
                     AppMessage incomingMessage = queueToClient.take();
-                    sendToClient(incomingMessage);
+                    if (incomingMessage.getCommand() != Command.KILL_BOT) {
+                        sendToClient(incomingMessage);
+                    } else {
+                        botJobEnded = true;
+                    }
                 } catch (InterruptedException e) {
                     log.info("Executor thread is interrupted");
                 }
@@ -100,6 +107,11 @@ public class TelegramSender extends TelegramLongPollingBot {
         } else if (update.hasCallbackQuery()) {
             reviewMessage = false;
             UUID id = UUID.fromString(update.getCallbackQuery().getData());
+            User user = update.getCallbackQuery().getFrom();
+            queueToApp.add(new AppMessage(Command.SEND, Sender.CLIENT, update.getCallbackQuery().getMessage().getChatId(),
+                    questionService.getAnswer(id).getAnswer(),
+                    new ClientData(user.getFirstName(), user.getLastName(), user.getUserName())));
+
             if (questionService.isReviewAnswer(id)) {
                 sendMessage = sendReviewMessage(update.getCallbackQuery().getMessage().getChatId().toString());
                 reviewMessage = true;
@@ -121,19 +133,21 @@ public class TelegramSender extends TelegramLongPollingBot {
 
     private void sendMessageInfoToService(Update update) {
         Message message = null;
+        Sender sender = null;
         if (update.hasMessage() && update.getMessage().hasText()) {
-            
             message = update.getMessage();
+            sender = Sender.CLIENT;
         }
         else if(update.hasCallbackQuery()){
             message = update.getCallbackQuery().getMessage();
+            sender = Sender.BOT;
         }
         String messageTxt = message.getText();
         long chatId = message.getChatId();
         String clientFirstName = message.getFrom().getFirstName();
         String clientLastName = message.getFrom().getLastName();
         String clientUserName = message.getFrom().getUserName();
-        AppMessage appMessage = new AppMessage(Command.SEND, chatId, messageTxt,
+        AppMessage appMessage = new AppMessage(Command.SEND, sender, chatId, messageTxt,
                 new ClientData(clientFirstName, clientLastName, clientUserName));
         queueToApp.add(appMessage);
     }
@@ -186,11 +200,13 @@ public class TelegramSender extends TelegramLongPollingBot {
 
     @Override
     public String getBotUsername() {
+//        return "kfmnbot";
         return "dmitry_katon_bot";
     }
 
     @Override
     public String getBotToken() {
-        return "680522400:AAHyuF4mTpQgxz0_VUUcYQKNYDtk2O6Nnfo";
+//        return "784024922:AAFMkTWGXIKdZkQ2lz6RFxo2ikV-nGIL47M"; //kfmnbot
+        return "680522400:AAHyuF4mTpQgxz0_VUUcYQKNYDtk2O6Nnfo"; //dmitry_katon_bot
     }
 }

@@ -46,10 +46,6 @@ public class ChatMessage extends Message {
         return Objects.hash(sender, message);
     }
 
-    public enum Sender {
-        CLIENT, APP
-    }
-
     @Override
     public String toString() {
         return "ChatMessage{" +

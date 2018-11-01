@@ -49,7 +49,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     clientsByVspId.computeIfAbsent(/*incomingMessage.getVspId()*/123L, k -> new HashMap<>())
                             .put(incomingMessage.getChatId(), incomingMessage.getClientData());
                     messagesByChatId.computeIfAbsent(incomingMessage.getChatId(), k -> new LinkedList<>())
-                            .add(new ChatMessage(ChatMessage.Sender.CLIENT, incomingMessage.getMessage()));
+                            .add(new ChatMessage(Sender.CLIENT, incomingMessage.getMessage()));
                     sendToApp(incomingMessage);
                 } catch (InterruptedException e) {
                     log.info("Executor thread is interrupted");
@@ -78,7 +78,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
             }
             case SEND: {
                 messagesByChatId.computeIfAbsent(incomingMessage.getChatId(), k -> new LinkedList<>())
-                        .add(new ChatMessage(ChatMessage.Sender.APP, incomingMessage.getMessage()));
+                        .add(new ChatMessage(Sender.APP, incomingMessage.getMessage()));
                 queueToClient.add(incomingMessage);
                 break;
             }
@@ -94,7 +94,13 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     break;
                 }
                 case KILL_BOT: {
-                    log.info("Killing bot for chatId= {}", incomingMessage.getChatId());
+                    queueToClient.add(incomingMessage);
+                    break;
+                }
+                case SEND_MESSAGE: {
+                    messagesByChatId.computeIfAbsent(incomingMessage.getChatId(), k -> new LinkedList<>())
+                            .add(new ChatMessage(Sender.APP, incomingMessage.getMessage()));
+                    queueToClient.add(incomingMessage);
                     break;
                 }
             default: {
