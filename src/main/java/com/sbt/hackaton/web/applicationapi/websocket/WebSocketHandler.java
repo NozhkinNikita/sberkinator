@@ -93,6 +93,10 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     sendMessage(session, new ChatHistory(Command.GET_CHAT, messagesByChatId.get(incomingMessage.getChatId())));
                     break;
                 }
+                case KILL_BOT: {
+                    log.info("Killing bot for chatId= {}", incomingMessage.getChatId());
+                    break;
+                }
             default: {
                 throw new IllegalArgumentException(String.format("Command %s is not supported", incomingMessage.getCommand()));
             }
@@ -108,10 +112,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 sendMessage(webSocketSession, message);
             });
         }
-//        sessionsByChatId.computeIfPresent(message.getChatId(), (k, v) -> {
-//            v.forEach(webSocketSession -> sendMessage(webSocketSession, message));
-//            return v;
-//        });
     }
 
     private AppMessage parseMessage(TextMessage message) {
@@ -134,8 +134,10 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
     private void sendMessage(WebSocketSession webSocketSession, Message message) {
         try {
-            webSocketSession.sendMessage(new TextMessage(
-                    Objects.requireNonNull(serializeMessage(message))));
+            if (webSocketSession.isOpen()) {
+                webSocketSession.sendMessage(new TextMessage(
+                        Objects.requireNonNull(serializeMessage(message))));
+            }
         } catch (IOException e) {
             log.error("Error while sending message {}. Exception: {}", message, e);
         }
