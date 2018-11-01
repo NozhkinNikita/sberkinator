@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap core CSS -->
+    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <link href="css/simple-sidebar.css" rel="stylesheet">
+</head>
+<body>
+<div id="wrapper">
+    <!-- Sidebar -->
+    <div id="sidebar-wrapper">
+        <ul class="sidebar-nav">
+            <li class="sidebar-brand">
+                <a href="#">
+                    Чаты
+                </a>
+            </li>
+            <div id="listOfChats">
+            </div>
+        </ul>
+    </div>
+    <!-- /#sidebar-wrapper -->
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+        <div class="container-fluid">
+            <h1><p id="headerUserName"></p></h1>
+            <div class="container-fluid">
+                <div class="my-3 p-3 bg-white rounded box-shadow" id="messages">
+                </div>
+                <div class="form-group">
+                    <textarea class="form-control" id="textAreaForChat" disabled="true" rows="3"></textarea>
+                </div>
+                <a href="#connectToChat" class="btn btn-secondary" id="connectToChat">Подключиться</a>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /#page-content-wrapper -->
+
+<!-- /#wrapper -->
+
+<!-- Bootstrap core JavaScript -->
+<script src="vendor/jquery/jquery.min.js"></script>
+<script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/0.3.4/sockjs.min.js"></script>
+<script src="index.js"></script>
+
+<!-- Menu Toggle Script -->
+<script>
+
+    $(document).ready(function () {
+        console.log("ready!");
+        $("#wrapper").toggleClass("toggled");
+    });
+
+    $("#menu-toggle").click(function (e) {
+        e.preventDefault();
+        $("#wrapper").toggleClass("toggled");
+    });
+
+    $("#connectToChat").click(function (e) {
+        e.preventDefault();
+        startMessageWithChat();
+    });
+</script>
+
+</body>
+</html>
