@@ -4,30 +4,34 @@ import com.sbt.hackaton.web.AppMessage;
 import com.sbt.hackaton.web.Command;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@Component
 public class TelegramSender extends TelegramLongPollingBot {
     private static final Logger log = LoggerFactory.getLogger(TelegramSender.class);
 
-    @Resource(name = "queueToApp")
     private BlockingQueue<AppMessage> queueToApp;
 
-    @Resource(name = "queueToClient")
     private BlockingQueue<AppMessage> queueToClient;
     private ExecutorService executor = Executors.newFixedThreadPool(1);
 
-    @PostConstruct
+    public TelegramSender(DefaultBotOptions options, BlockingQueue<AppMessage> queueToApp,
+                          BlockingQueue<AppMessage> queueToClient, ExecutorService executor) {
+        super(options);
+        this.queueToApp = queueToApp;
+        this.queueToClient = queueToClient;
+        this.executor = executor;
+
+        init();
+    }
+
     public void init() {
         executor.execute(() -> {
             while (!Thread.currentThread().isInterrupted())
