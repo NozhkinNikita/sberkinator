@@ -100,6 +100,12 @@
             <artifactId>telegrambots</artifactId>
             <version>4.1</version>
         </dependency>
+
+        <!--<dependency>-->
+            <!--<groupId>com.vk.api</groupId>-->
+            <!--<artifactId>sdk</artifactId>-->
+            <!--<version>0.5.12</version>-->
+        <!--</dependency>-->
     </dependencies>
 
 
