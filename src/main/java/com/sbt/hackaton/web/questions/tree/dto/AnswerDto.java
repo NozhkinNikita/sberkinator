@@ -28,7 +28,7 @@ public class AnswerDto {
     @Override
     public String toString() {
         return "AnswerDto{" +
-                "key='" + key + '\'' +
+                "id=" + id +
                 ", answer='" + answer + '\'' +
                 ", isTerminate=" + isTerminate +
                 '}';

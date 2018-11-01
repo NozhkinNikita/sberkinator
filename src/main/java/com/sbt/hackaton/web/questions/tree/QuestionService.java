@@ -24,14 +24,14 @@ public class QuestionService {
     private ObjectMapper objectMapper;
 
     private QuestionDto rootDto;
-    private Map<Pair, QuestionDto> tree;
+    private Map<UUID, QuestionDto> tree;
 
     @PostConstruct
     public void init() throws Exception {
 
         URL url = getClass().getResource("/questions.json");
 
-        final Map<Pair, QuestionDto> nodes = new HashMap<>();
+        final Map<UUID, QuestionDto> nodes = new HashMap<>();
         QuestionNode root = objectMapper.readValue(url, QuestionNode.class);
 
         logger.error("root={}", root);
@@ -45,14 +45,12 @@ public class QuestionService {
         logger.info("tree: {}", tree);
     }
 
-    private void fillNodes(final Map<Pair, QuestionDto> nodes, final QuestionNode parent) {
-        parent.setId(UUID.randomUUID());
+    private void fillNodes(final Map<UUID, QuestionDto> nodes, final QuestionNode parent) {
         parent.getAnswers().forEach(answerNode -> {
             if (!answerNode.isTerminate()) {
-                Pair pair = new Pair(parent.getId(), answerNode.getKey());
                 final QuestionNode childQuestionNode = answerNode.getQuestionNode();
+                nodes.put(answerNode.getId(), createQuestionDtoByNode(childQuestionNode));
                 fillNodes(nodes, childQuestionNode);
-                nodes.put(pair, createQuestionDtoByNode(childQuestionNode));
             }
         });
     }
@@ -62,20 +60,27 @@ public class QuestionService {
     }
 
     public QuestionDto getNext(UUID answerId) {
-        QuestionDto questionNode = tree.get(key);
+        QuestionDto questionNode = tree.get(answerId);
         if (questionNode == null) {
-            throw new IllegalArgumentException("Отсутствует вопрос по ключу " + key);
+            throw new IllegalArgumentException("Отсутствует вопрос для ответа с id = " + answerId);
         }
         return questionNode;
     }
 
     private QuestionDto createQuestionDtoByNode(final QuestionNode node) {
+        logger.error("!!!!node: {}", node);
+        node.setId(UUID.randomUUID()); // todo удалить генерацию id
         QuestionDto questionDto = new QuestionDto();
         questionDto.setId(node.getId());
         questionDto.setQuestionText(node.getQuestionText());
 
-        questionDto.setAnswers(node.getAnswers().stream().map(answerNode ->
-                new AnswerDto(answerNode.getKey(), answerNode.getAnswer(), answerNode.isTerminate())
+        questionDto.setAnswers(node.getAnswers().stream()
+                .map(answerNode -> {
+                    answerNode.setId(UUID.randomUUID()); // todo удалить генерацию id
+                    return answerNode;
+                })
+                .map(answerNode ->
+                new AnswerDto(answerNode.getId(), answerNode.getAnswer(), answerNode.isTerminate())
         ).collect(Collectors.toList()));
 
         return questionDto;
