@@ -47,9 +47,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 try {
                     AppMessage incomingMessage = queueToApp.take();
                     clientsByVspId.computeIfAbsent(/*incomingMessage.getVspId()*/123L, k -> new HashMap<>())
-                            .put(incomingMessage.getChatId(), incomingMessage.getClientData());
+                            .putIfAbsent(incomingMessage.getChatId(), incomingMessage.getClientData());
                     messagesByChatId.computeIfAbsent(incomingMessage.getChatId(), k -> new LinkedList<>())
-                            .add(new ChatMessage(Sender.CLIENT, incomingMessage.getMessage()));
+                            .add(new ChatMessage(incomingMessage.getSender(), incomingMessage.getMessage()));
                     sendToApp(incomingMessage);
                 } catch (InterruptedException e) {
                     log.info("Executor thread is interrupted");
