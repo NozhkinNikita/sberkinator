@@ -208,13 +208,15 @@ public class TelegramSender extends TelegramLongPollingBot {
 
     @Override
     public String getBotUsername() {
+        return "sber_vsp_3501_bot";
 //        return "kfmnbot";
-        return "dmitry_katon_bot";
+//        return "dmitry_katon_bot";
     }
 
     @Override
     public String getBotToken() {
+        return "664158658:AAFGksPQCc1nP97f7spgvy6q8zGi31JtFfo"; //sber_vsp_3501_bot
 //        return "784024922:AAFMkTWGXIKdZkQ2lz6RFxo2ikV-nGIL47M"; //kfmnbot
-        return "680522400:AAHyuF4mTpQgxz0_VUUcYQKNYDtk2O6Nnfo"; //dmitry_katon_bot
+//        return "680522400:AAHyuF4mTpQgxz0_VUUcYQKNYDtk2O6Nnfo"; //dmitry_katon_bot
     }
 }
